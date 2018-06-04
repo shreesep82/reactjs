@@ -1,0 +1,86 @@
+<meta></meta>
+<title>myapp</title>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+
+
+<html>
+<body>
+
+<div id=root>
+</div>
+
+
+</body>
+</html>
+
+
+<script type="text/babel">
+
+
+class UserPresent extends React.Component {
+	constructor(props) {
+		super(props)
+	}
+
+	render() {
+		if(!this.props.loggedIn)
+			return null
+
+		return (
+			<b>User Online</b>
+		)
+	}
+}
+
+class LoginLogout extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			loggedIn : false
+		}
+	}
+
+	login_logout_Handler = (e) => {
+		e.preventDefault()
+		{
+			(this.state.loggedIn && console.log('user logged out'))
+		}
+		{
+			(!this.state.loggedIn && console.log('user logged in'))
+		}
+
+		this.setState((previousState) => {
+			return { loggedIn : !previousState.loggedIn  } 
+		})
+	}
+
+	render() {
+
+		let button
+
+		if(this.state.loggedIn)
+			button = <button onClick={this.login_logout_Handler} >Click to Logout</button>
+		else
+			button = <button onClick={this.login_logout_Handler} >Click to Login</button>
+
+		return (
+			<div>
+			<UserPresent loggedIn={this.state.loggedIn} />
+			<br />
+			{button}		
+			</div>
+		)
+	}
+}
+
+ReactDOM.render(
+	<LoginLogout />,
+	document.getElementById("root")
+);
+
+
+</script>

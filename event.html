@@ -1,0 +1,55 @@
+<meta></meta>
+<title>myapp</title>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+
+
+<html>
+<body>
+
+<div id=root>
+</div>
+
+<a href="https://www.google.com" onclick="return false;">google</a>
+
+</body>
+</html>
+
+
+<script type="text/babel">
+
+class BlackButton extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			status : 'ON'
+		}
+		// let's not use below method
+		// this.e_handler = this.e_handler.bind(this)
+	}
+
+	e_handler = (off_status, e) => {
+		e.preventDefault()
+		this.setState((previousState) => {
+			return { status : previousState.status == 'ON' ? off_status : 'ON' }
+		})
+		console.log(this.state.status)
+	}
+
+	render() {
+		return (
+			<button onClick={this.e_handler.bind(this, 'OFF')} >Status : {this.state.status}</button>
+		)
+	}
+}
+
+ReactDOM.render(
+	<BlackButton />,
+	document.getElementById("root")
+);
+
+
+</script>

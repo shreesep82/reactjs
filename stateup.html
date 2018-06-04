@@ -1,0 +1,111 @@
+<meta></meta>
+<title>myapp</title>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+
+
+<html>
+<body>
+
+<div id=root>
+</div>
+
+
+</body>
+</html>
+
+
+<script type="text/babel">
+
+class ScoreInput extends React.Component {
+	constructor(props) {
+		super(props)
+	}
+
+	render() {
+		return (
+			<fieldset>
+				<legend>Enter number of {this.props.scale}</legend>
+				<label>
+					{this.props.scale} 
+					<input value={this.props.score} scale={this.props.scale} onChange={this.props.onChange.bind(this, this.props.scale)} />
+				</label>
+			</fieldset>
+		)
+	}
+}
+
+class ScoreDisplay extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			match_status : 'Match has started'
+		}
+	}
+
+	render() {
+		console.log('ScoreDisplay: score : ' + this.props.score)
+		return (
+			<h2>{
+				(this.props.scale == 'balls' &&
+					(((this.props.score >= 120 && 'Innings over') ||
+					(this.props.score >= 30 && 'Power play over') ||
+					(this.state.match_status) ))) ||
+
+					(((this.props.score >= 20 && 'Innings over') ||
+					(this.props.score >= 5 && 'Power play over') ||
+					(this.state.match_status) ))
+			}
+			</h2>
+		)
+	}
+}
+
+class ScoreBoard extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			scale : 'balls',
+			score : 0
+		}
+	}
+
+	handleChange = (scale, evt) => {
+		let score = evt.target.value
+		console.log("scale : " + scale)
+
+		this.setState(() => {
+			return { scale : scale, score : score }
+		})
+	}
+
+	render() {
+
+		console.log('score before parseInt : ' + this.state.score)
+		let score = parseInt(this.state.score)
+
+		console.log('score before rendering : ' + score)
+		if(Number.isNaN(score)) {
+			score = 0
+		}
+
+		return (
+			<div>
+			<ScoreInput scale="balls" score={this.state.scale == 'balls' ? score : (score * 6)} onChange={this.handleChange} />
+			<ScoreInput scale="overs" score={this.state.scale == 'overs' ? score : (score / 6)} onChange={this.handleChange} />
+			<ScoreDisplay scale={this.state.scale == 'balls' ? 'balls' : 'overs'} score={score}/>
+			</div>
+		)
+	}
+}
+
+ReactDOM.render(
+	<ScoreBoard />,
+	document.getElementById("root")
+);
+
+
+</script>

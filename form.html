@@ -1,0 +1,119 @@
+<meta></meta>
+<title>myapp</title>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+
+
+<html>
+<body>
+
+<div id=root>
+</div>
+
+
+</body>
+</html>
+
+
+<script type="text/babel">
+
+class ListItem extends React.Component {
+	constructor(props) {
+		super(props)
+	}
+
+	render() {
+		const list = this.props.list
+		const number = this.props.number
+		console.log(list, number)
+		return (
+			<ul>
+			{
+				list.map((listItem) => {
+					return (listItem.id % 2 == number) && (<li key={listItem.id}>{listItem.title}</li>)
+				})
+			}
+			</ul>
+		)
+	}
+}
+
+class Form extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			text_value : '',
+			text_placeholder : 'Enter some value',
+			submit_value : 'submit',
+			selected_value : '1',
+			select_submit_value : 'Submit Second',
+			selected_text : 'Second'
+		}
+	}
+
+	handleTextChange = (evt) => {
+		let cur_value = evt.target.value.toUpperCase()
+
+		this.setState({
+			text_value : cur_value,
+			submit_value : 'Submit ' + cur_value
+		})
+	}
+
+	handleSubmit = (evt) => {
+		evt.preventDefault()
+		alert('Submitting ' + this.state.text_value)
+	}
+
+/////////////////////////////////////////////////////////////////////////
+
+	handleSelectSubmit = (evt) => {
+		evt.preventDefault()
+		alert('Value chosen ' + this.state.selected_text)
+	}
+
+	handleSelectChange = (evt) => {
+		let cur_value = evt.target.value
+		let cur_text = evt.target.options[cur_value].text
+
+		console.log(cur_text)
+		this.setState({
+			selected_value : cur_value,
+			select_submit_value : 'Submit ' + cur_text,
+			selected_text : cur_text
+		})
+	}
+
+	render() {
+
+		return (
+			<div>
+			<form onSubmit={this.handleSubmit}>
+			<input type="text" value={this.state.text_value} placeholder={this.state.text_placeholder} onChange={this.handleTextChange}></input>
+			<input type="submit" value={this.state.submit_value} ></input>
+			</form>
+
+			<hr/>
+
+			<form onSubmit={this.handleSelectSubmit}>
+			<select  value={this.state.selected_value}  onChange={this.handleSelectChange}>
+			<option value="0">First</option>
+			<option value="1">Second</option>
+			</select>
+			<input type="submit" value={this.state.select_submit_value} ></input>
+			</form>
+			</div>
+		)
+	}
+}
+
+ReactDOM.render(
+	<Form />,
+	document.getElementById("root")
+);
+
+
+</script>

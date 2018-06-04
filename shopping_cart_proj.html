@@ -1,0 +1,311 @@
+<meta></meta>
+<title>myapp</title>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+
+
+<html>
+<body>
+
+<div id=root>
+</div>
+
+
+</body>
+</html>
+
+
+<script type="text/babel">
+
+class SearchSection extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+		}
+	}
+
+	render() {
+		console.log(this.props.children)
+		return (
+			<div>
+			<input type="text" placeholder="Search items" onChange={this.props.handleSearchChange.bind(this)} />
+			<input type="checkbox"  onChange={this.props.handleShowAllItems} /> {' Show all items '}
+			<input type="checkbox"  onChange={this.props.handleShowAvailableItems} /> {' List available items '}
+			<input type="checkbox"  onChange={this.props.handleShowAvailableItems} /> {' Allow not available items to be chosen '}
+			</div>
+		)
+	}
+}
+
+class ProductListHeader extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+		}
+	}
+
+	render() {
+		// put name, price here
+		return (
+			<thead>
+			<tr>
+			<th>
+				<h2>Name</h2>
+			</th>
+			<th>
+				<h2>Price</h2>
+			</th>
+			<th>
+				<h2>Chosen status</h2>
+			</th>
+			</tr>
+			</thead>
+		)
+	}
+}
+
+class productDetails {
+	constructor(productName, productPrice, productAvailability) {
+		this.name = productName
+		this.price = productPrice
+		this.availability = productAvailability
+	}
+
+	getName() {
+		return this.name
+	}
+
+	getPrice() {
+		return this.price
+	}
+
+	getAvailability() {
+		return this.availability
+	}
+}
+
+class ProductList extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			product_categories_items : [],
+		}
+	}
+
+
+	render() {
+		// put product list category, products list here
+		let products_list = this.props.products_list
+		let rows = []
+		let product_name
+		let product_price
+		let product_category
+		let product_availability
+		let product_list_array = []
+		let product_available
+		let row
+		let loop_counter = 0
+		let searchValue = this.props.searchValue
+
+
+		if(! Object.keys(this.state.product_categories_items).length) {
+			while(loop_counter < products_list.length)  {
+				product_name = products_list[loop_counter].name
+				product_category = products_list[loop_counter].category
+				product_price = products_list[loop_counter].price
+				product_availability = products_list[loop_counter].available
+				product_list_array = []
+				if(this.state.product_categories_items[product_category] === undefined) {
+					this.state.product_categories_items[product_category] = []
+				}
+
+				let pd = new productDetails(product_name, product_price, product_availability)
+				product_list_array.push(pd)
+				this.state.product_categories_items[product_category].push(product_list_array)
+				loop_counter++
+			}
+
+		}
+
+		loop_counter = 0
+		if(this.props.showAllItems) {
+			Object.keys(this.state.product_categories_items).forEach((category) => {
+				console.log('category : ' + category)
+				row = <tr bgcolor="#c0c0c0" key={category}><th colSpan="2">{category}</th></tr>
+				rows.push(row)
+				this.state.product_categories_items[category].forEach((product_details) => {
+					console.log('Product Name : ' + product_details[0].getName())
+					row = <tr style={{color: product_details[0].getAvailability() ? '#000000' : '#0000ff'}} key={product_details[0].getName()}><td>{product_details[0].getName()}</td><td>{product_details[0].getPrice()}</td></tr>
+					rows.push(row)
+				})
+			})
+
+
+		}
+		else {
+			Object.keys(this.state.product_categories_items).forEach((category) => {
+				let category_header_displayed = false
+				this.state.product_categories_items[category].forEach((product_details) => {
+
+					product_name = product_details[0].getName()
+					product_price = product_details[0].getPrice()
+					product_available = product_details[0].getAvailability()
+
+					if(product_name.indexOf(searchValue) === -1) {
+						return false
+					}
+					if(this.props.showAvailableItems && !product_available) {
+						return false
+					}
+					else {
+						if(! category_header_displayed) {
+							row = <tr bgcolor="#c0c0c0" key={category}><th colSpan="2">{category}</th></tr>
+							rows.push(row)
+							category_header_displayed = true
+						}
+
+						row = <tr  style={{color: product_available ? '#000000' : '#0000ff'}} key={product_name}><td>{product_name}</td><td>{product_price}</td><td><center><input type="checkbox" onChange={this.props.onProductChosen.bind(this, product_name, product_price)} /></center></td></tr>
+						rows.push(row)
+					}
+				})
+			})
+		}
+
+		return (
+			<tbody>
+			{rows}
+			</tbody>
+		)
+	}
+}
+
+class ProductTable extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+		}
+	}
+
+	render() {
+	console.log('onProductChosen : ' + this.props.onProductChosen)
+		return (
+			<div>
+			<table border="1">
+				<ProductListHeader />
+				<ProductList searchValue={this.props.searchValue} showAvailableItems={this.props.showAvailableItems} showAllItems={this.props.showAllItems} products_list={this.props.products_list} onProductChosen={this.props.onProductChosen} />
+			</table>
+			</div>
+		)
+	}
+}
+
+class MyCart extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			cartCollection : []
+		}
+	}
+
+	render() {
+		if(! Object.keys(this.state.cartCollection).length) {
+			console.log('cart empty')
+			var json_obj = {}
+			json_obj["productName"] = this.props.productName
+			//json_obj['productPrice'] = this.props.productPrice
+			console.log('json_obj : ' + JSON.stringify(json_obj, null, 2))
+			this.state.cartCollection.push(json_obj)
+			console.log('entry : ' + JSON.stringify(this.state.cartCollection[0]))
+			//console.log('entry : ' + this.state.cartCollection[0])
+			return ('')
+		}
+
+
+		return (
+			<table border="1">
+				<tr>
+					<th>Item</th>
+					<th>Price</th>
+				</tr>
+			</table>
+		)
+	}
+}
+
+class ShoppingCart extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			showAllItems : false,
+			searchValue : '',
+			showAvailableItems : false,
+			productChosen : false,
+			chosenProductName : '',
+			chosenProductPrice : ''
+		}
+	}
+
+	handleShowAllItems = (evt) => {
+		//console.log('checked : ' + evt.target.checked)
+		this.setState({
+			showAllItems : evt.target.checked
+		})
+	}
+
+	handleShowAvailableItems = (evt) => {
+		//console.log('checked : ' + evt.target.checked)
+		this.setState({
+			showAvailableItems : evt.target.checked
+		})
+	}
+
+	handleSearchChange = (evt) => {
+		//console.log('value : ' + evt.target.value)
+		this.setState({
+			searchValue : evt.target.value
+		})
+	}
+
+	handleProductChosen = (product_name, product_price, evt) => {
+		console.log('product_name : ' + product_name + ' product_price : ' + product_price)
+		this.setState({
+			productChosen : evt.target.checked,
+			chosenProductName : product_name,
+			chosenProductPrice : product_price
+		})
+	}
+
+	render() {
+
+		return (
+			<div>
+			<h1>Shopping Cart</h1>
+			<br />
+			<SearchSection handleShowAvailableItems={this.handleShowAvailableItems} handleShowAllItems={this.handleShowAllItems} handleSearchChange={this.handleSearchChange} />
+			<ProductTable searchValue={this.state.searchValue} showAvailableItems={this.state.showAvailableItems} showAllItems={this.state.showAllItems} products_list={this.props.products_list} onProductChosen={this.handleProductChosen} />
+			<hr />
+			<MyCart  productChosen={this.state.productChosen} chosenProductName={this.state.chosenProductName} chosenProductPrice={this.state.chosenProductPrice} />
+			</div>
+		)
+	}
+}
+
+	let products_list = [
+							{category : 'sports', name : 'Stumps', price : '10', available : true},
+							{category : 'Music', name : 'Compact Disk', price : '20', available : true},
+							{category : 'Dance', name : 'Kathak', price : '80', available : false},
+							{category : 'Music', name : 'DVD', price : '30', available : false},
+							{category : 'Dance', name : 'Salsa', price : '100', available : true},
+							{category : 'Music', name : 'VCD', price : '40', available : true}
+						]
+
+ReactDOM.render(
+	<ShoppingCart products_list={products_list} />,
+	document.getElementById("root")
+);
+
+
+</script>

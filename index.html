@@ -1,0 +1,58 @@
+<meta></meta>
+<title>myapp</title>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+
+
+<html>
+<body>
+
+<div id=root>
+</div>
+
+</body>
+</html>
+
+
+<script type="text/babel">
+
+function Element() {
+	return <h1>Header</h1>
+}
+
+class TableHeader extends React.Component {
+	render() {
+		return (
+			<th bgcolor={this.props.HeaderBgcolor}  style={{color: this.props.HeaderFontColor}} >{this.props.HeaderName}</th>
+		)
+	}
+}
+
+class Table extends React.Component {
+
+	render() {
+		console.log('will return table')
+		return (
+			<table bgcolor="#c0c0c0">
+				<TableHeader HeaderFontColor="#0000ff" HeaderBgcolor="#c0c0c0" HeaderName="This is Table Header" />
+			</table>
+		)
+	}
+}
+
+ReactDOM.render(
+	<Table />,
+	document.getElementById("root")
+);
+
+/*
+ReactDOM.render(
+	<h1>Some new content</h1>,
+	document.getElementById("root")
+);
+*/
+
+</script>

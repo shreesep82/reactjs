@@ -1,0 +1,74 @@
+<meta></meta>
+<title>myapp</title>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+
+
+<html>
+<body>
+
+<div id=root>
+</div>
+
+
+</body>
+</html>
+
+
+<script type="text/babel">
+
+class FormStruct extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+		}
+	}
+
+	render() {
+		console.log(this.props.children)
+		return (
+			<div className={'FancyBorder FancyBorder-' + this.props.BorderColor}>
+				{this.props.children}
+			</div>
+		)
+	}
+}
+
+class SignUpForm extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+		}
+	}
+
+
+	render() {
+
+		return (
+			<div>
+			<FormStruct BorderColor="red">
+			<fieldset>
+			<legend>Enter Firstname and Lastname</legend>
+			<label>Firstname : 
+				<input placeholder="Firstname" />
+			</label>
+			<label>Lastname : 
+				<input placeholder="Lastname" />
+			</label>
+			</fieldset>
+			</FormStruct>
+			</div>
+		)
+	}
+}
+
+ReactDOM.render(
+	<SignUpForm />,
+	document.getElementById("root")
+);
+
+
+</script>

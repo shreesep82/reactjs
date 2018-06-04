@@ -1,0 +1,83 @@
+<meta></meta>
+<title>myapp</title>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+
+
+<html>
+<body>
+
+<div id=root>
+</div>
+
+<a href="https://www.google.com" onclick="return false;">google</a>
+
+</body>
+</html>
+
+
+<script type="text/babel">
+
+class Counter extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			counter : 1
+		}
+	}
+
+	componentDidMount() {
+		console.log('mounting')
+		this.state.timerId = setInterval(() => {
+		this.count()
+		},
+		1000
+		)
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.state.timerId)
+	}
+
+	count() {
+/*
+		this.setState({
+			counter : this.state.counter + 1
+		})
+*/
+
+		this.setState((previousState, props) => {
+			console.log(previousState.counter)
+			return { counter : previousState.counter + parseInt(props.incValue, 10) }
+		})
+	
+		if(this.state.counter >= 20) {
+			console.log('will unmount')
+
+			ReactDOM.render(
+			    <h1>It is over</h1>,
+			    document.getElementById("root")
+			);
+
+		}
+
+	}
+
+	render() {
+		console.log('rendering')
+		return (
+			<h1>Counter : {this.state.counter}</h1>
+		)
+	}
+}
+
+ReactDOM.render(
+	<Counter incValue="3" />,
+	document.getElementById("root")
+);
+
+
+</script>

@@ -1,0 +1,82 @@
+<meta></meta>
+<title>myapp</title>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+
+
+<html>
+<body>
+
+<div id=root>
+</div>
+
+
+</body>
+</html>
+
+
+<script type="text/babel">
+
+class ListItem extends React.Component {
+	constructor(props) {
+		super(props)
+	}
+
+	render() {
+		const list = this.props.list
+		const number = this.props.number
+		console.log(list, number)
+		return (
+			<ul>
+			{
+				list.map((listItem) => {
+					return (listItem.id % 2 == number) && (<li key={listItem.id}>{listItem.title}</li>)
+				})
+			}
+			</ul>
+		)
+	}
+}
+
+class DisplayBoard extends React.Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			number : 0
+		}
+	}
+
+	handleClick = (e) => {
+		e.preventDefault()
+		this.setState((previousState) => {
+			return { number : !previousState.number }
+		})
+	}
+
+	render() {
+		let lists = [
+			{ "id" : "0", "title" : "Even first"},
+			{ "id" : "1", "title" : "odd first"},
+			{ "id" : "2", "title" : "Even second"},
+			{ "id" : "3", "title" : "odd second"},
+		]
+
+		return (
+			<div>
+			<button onClick={this.handleClick}>Display {this.state.number ? 'even' : 'odd'}</button>
+			<ListItem list={lists} number={this.state.number ? 1 : 0} />
+			</div>
+		)
+	}
+}
+
+ReactDOM.render(
+	<DisplayBoard />,
+	document.getElementById("root")
+);
+
+
+</script>
