@@ -34,7 +34,7 @@ class SearchSection extends React.Component {
 			<input type="text" placeholder="Search items" onChange={this.props.handleSearchChange.bind(this)} />
 			<input type="checkbox"  onChange={this.props.handleShowAllItems} /> {' Show all items '}
 			<input type="checkbox"  onChange={this.props.handleShowAvailableItems} /> {' List available items '}
-			<input type="checkbox"  onChange={this.props.handleShowAvailableItems} /> {' Allow not available items to be chosen '}
+			<input type="checkbox"  onChange={this.props.handleChooseNotAvailableItems} /> {' Allow not available items to be chosen '}
 			</div>
 		)
 	}
@@ -169,7 +169,12 @@ class ProductList extends React.Component {
 							category_header_displayed = true
 						}
 
-						let disabled = product_available ? false : true
+						let disabled = false
+						console.log('chooseNotAvailableItems : ' + this.props.chooseNotAvailableItems)
+						if(! this.props.chooseNotAvailableItems) {
+							disabled = product_available ? false : true
+							console.log('product_name : ' + product_name + ' disabled : ' + disabled)
+						}
 						row = <tr  style={{color: product_available ? '#000000' : '#0000ff'}} key={product_name}><td>{product_name}</td><td>{product_price}</td><td><center><input type="checkbox" disabled={disabled} onChange={this.props.onProductChosen.bind(this, product_name, product_price)} /></center></td></tr>
 						rows.push(row)
 					}
@@ -198,7 +203,7 @@ class ProductTable extends React.Component {
 			<div>
 			<table border="1">
 				<ProductListHeader />
-				<ProductList searchValue={this.props.searchValue} showAvailableItems={this.props.showAvailableItems} showAllItems={this.props.showAllItems} products_list={this.props.products_list} onProductChosen={this.props.onProductChosen} />
+				<ProductList searchValue={this.props.searchValue} showAvailableItems={this.props.showAvailableItems} showAllItems={this.props.showAllItems} products_list={this.props.products_list} onProductChosen={this.props.onProductChosen} chooseNotAvailableItems={this.props.chooseNotAvailableItems}  />
 			</table>
 			</div>
 		)
@@ -208,9 +213,6 @@ class ProductTable extends React.Component {
 class MyCart extends React.Component {
 	constructor(props) {
 		super(props)
-		this.state = {
-			mycart_rows : []
-		}
 	}
 
 	render() {
@@ -219,70 +221,38 @@ class MyCart extends React.Component {
 
 		console.log('cartCollection length : ' + Object.keys(this.props.cartCollection).length)
 
-		if(this.props.chosenProductName.length && this.props.chosenProductPrice.length) {
-			console.log('productName : ' + this.props.chosenProductName)
-			console.log('productPrice : ' + this.props.chosenProductPrice)
+		console.log('productName : ' + this.props.chosenProductName)
+		console.log('productPrice : ' + this.props.chosenProductPrice)
 
-			if(this.props.productChosen) {
-				var json_obj = {}
-				json_obj['productName'] = this.props.chosenProductName
-				json_obj['ProductPrice'] = this.props.chosenProductPrice
-				console.log('json_obj : ' + JSON.stringify(json_obj))
-
-				this.props.cartCollection.push(json_obj)
-			}
-
-			Object.keys(this.props.cartCollection).forEach((index) => {
-				let collection = this.props.cartCollection[index]
-				console.log('collection : ' + collection)
-				if(collection.productName == this.props.chosenProductName) {
-					if(this.props.productChosen) {
-						let row = <tr key={collection.productName}><td>{collection.productName}</td><td>{collection.ProductPrice}</td></tr>
-						rows.push(row)
-						total_price += parseInt(collection.ProductPrice)
-					}
-					else {
-						delete this.props.cartCollection[index]
-					}
-				}
-				else {
-					let row = <tr key={collection.productName}><td>{collection.productName}</td><td>{collection.ProductPrice}</td></tr>
-					rows.push(row)
-					total_price += parseInt(collection.ProductPrice)
-				}
-
-			})
-
-			let row = <tr bgcolor="#c0c0f0" key="total_price"><td>{'Total bill'}</td><td>{total_price}</td></tr>
+		Object.keys(this.props.cartCollection).forEach((index) => {
+			let collection = this.props.cartCollection[index]
+			console.log('collection : ' + collection)
+			let row = <tr key={collection.productName}><td>{collection.productName}</td><td>{collection.ProductPrice}</td></tr>
 			rows.push(row)
-			this.state.mycart_rows = rows
+			total_price += parseInt(collection.ProductPrice)
+		})
 
-		}
+		let row = <tr bgcolor="#c0c0f0" key="total_price"><td>{'Total bill'}</td><td>{total_price}</td></tr>
+		rows.push(row)
 
-		if(! Object.keys(this.props.cartCollection).length) {
-			console.log('cart empty')
-			return ('')
-		}
-		else {
+		return (
+			<div>
+			<h2>{'My Cart'}</h2>
+			<br />
+			<table border="1">
+				<thead>
+					<tr>
+						<th>Item</th>
+						<th>Price</th>
+					</tr>
+				</thead>
+				<tbody>
+					{rows}
+				</tbody>
+			</table>
+			</div>
+		)
 
-			return (
-				<div>
-				<h2>{'My Cart'}</h2>
-				<br />
-				<table border="1">
-					<thead>
-						<tr>
-							<th>Item</th>
-							<th>Price</th>
-						</tr>
-					</thead>
-					<tbody>
-						{this.state.mycart_rows}
-					</tbody>
-				</table>
-				</div>
-			)
-		}
 	}
 }
 
@@ -297,6 +267,7 @@ class ShoppingCart extends React.Component {
 			chosenProductName : '',
 			chosenProductPrice : '',
 			cartCollection : [],
+			chooseNotAvailableItems : false
 		}
 	}
 
@@ -323,8 +294,34 @@ class ShoppingCart extends React.Component {
 		})
 	}
 
+	handleChooseNotAvailableItems = (evt) => {
+		console.log('value : ' + evt.target.checked)
+		this.setState({
+			chooseNotAvailableItems : evt.target.checked
+		})
+	}
+
 	handleProductChosen = (product_name, product_price, evt) => {
 		console.log('product_name : ' + product_name + ' product_price : ' + product_price)
+
+		if(evt.target.checked) {
+			var json_obj = {}
+			json_obj['productName'] = product_name
+			json_obj['ProductPrice'] = product_price
+			console.log('json_obj : ' + JSON.stringify(json_obj))
+
+			this.state.cartCollection.push(json_obj)
+		}
+		else {
+			Object.keys(this.state.cartCollection).forEach((index) => {
+				let collection = this.state.cartCollection[index]
+				console.log('collection : ' + collection)
+				if(collection.productName == product_name) {
+					delete this.state.cartCollection[index]
+				}
+			})
+		}
+
 		this.setState({
 			productChosen : evt.target.checked,
 			chosenProductName : product_name,
@@ -334,14 +331,24 @@ class ShoppingCart extends React.Component {
 
 	render() {
 
+		let myCart
+		const num_items_in_cart = Object.keys(this.state.cartCollection).length
+
+		if(! num_items_in_cart) {
+			myCart = ''
+		}
+		else {
+			myCart = <MyCart  cartCollection={this.state.cartCollection} chosenProductName={this.state.chosenProductName} chosenProductPrice={this.state.chosenProductPrice} />
+		}
+
 		return (
 			<div>
 			<h1>Shopping Cart</h1>
 			<br />
-			<SearchSection handleShowAvailableItems={this.handleShowAvailableItems} handleShowAllItems={this.handleShowAllItems} handleSearchChange={this.handleSearchChange} />
-			<ProductTable searchValue={this.state.searchValue} showAvailableItems={this.state.showAvailableItems} showAllItems={this.state.showAllItems} products_list={this.props.products_list} onProductChosen={this.handleProductChosen} />
+			<SearchSection handleShowAvailableItems={this.handleShowAvailableItems} handleShowAllItems={this.handleShowAllItems} handleSearchChange={this.handleSearchChange} handleChooseNotAvailableItems={this.handleChooseNotAvailableItems} />
+			<ProductTable searchValue={this.state.searchValue} showAvailableItems={this.state.showAvailableItems} showAllItems={this.state.showAllItems} products_list={this.props.products_list} onProductChosen={this.handleProductChosen} chooseNotAvailableItems={this.state.chooseNotAvailableItems}  />
 			<hr />
-			<MyCart  cartCollection={this.state.cartCollection} productChosen={this.state.productChosen} chosenProductName={this.state.chosenProductName} chosenProductPrice={this.state.chosenProductPrice} />
+			{myCart}
 			</div>
 		)
 	}
