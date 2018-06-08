@@ -139,8 +139,22 @@ class ProductList extends React.Component {
 				this.state.product_categories_items[category].forEach((product_details) => {
 					console.log('Product Name : ' + product_details[0].getName())
 
-					let disabled = product_details[0].getAvailability() ? false : true
-					row = <tr style={{color: product_details[0].getAvailability() ? '#000000' : '#0000ff'}} key={product_details[0].getName()}><td>{product_details[0].getName()}</td><td>{product_details[0].getPrice()}</td><td><center><input type="checkbox" disabled={disabled} onChange={this.props.onProductChosen.bind(this, product_name, product_price)} /></center></td></tr>
+					let disabled = false
+					console.log('chooseNotAvailableItems : ' + this.props.chooseNotAvailableItems)
+					if(! this.props.chooseNotAvailableItems) {
+						disabled = product_details[0].getAvailability() ? false : true
+					}
+
+					let checked = false
+					Object.keys(this.props.cartCollection).forEach((index) => {
+						let collection = this.props.cartCollection[index]
+						if(collection.productName == product_details[0].getName()) {
+							checked = true
+							return false
+						}
+					})
+
+					row = <tr style={{color: product_details[0].getAvailability() ? '#000000' : '#0000ff'}} key={product_details[0].getName()}><td>{product_details[0].getName()}</td><td>{product_details[0].getPrice()}</td><td><center><input type="checkbox" checked={checked} disabled={disabled} onChange={this.props.onProductChosen.bind(this, product_details[0].getName(), product_details[0].getPrice(), product_details[0].getAvailability())} /></center></td></tr>
 					rows.push(row)
 				})
 			})
@@ -175,7 +189,18 @@ class ProductList extends React.Component {
 							disabled = product_available ? false : true
 							console.log('product_name : ' + product_name + ' disabled : ' + disabled)
 						}
-						row = <tr  style={{color: product_available ? '#000000' : '#0000ff'}} key={product_name}><td>{product_name}</td><td>{product_price}</td><td><center><input type="checkbox" disabled={disabled} onChange={this.props.onProductChosen.bind(this, product_name, product_price)} /></center></td></tr>
+
+						let checked = false
+						Object.keys(this.props.cartCollection).forEach((index) => {
+							let collection = this.props.cartCollection[index]
+							if(collection.productName == product_name) {
+								checked = true
+								return false
+							}
+						})
+
+
+						row = <tr  style={{color: product_available ? '#000000' : '#0000ff'}} key={product_name}><td>{product_name}</td><td>{product_price}</td><td><center><input type="checkbox" checked={checked} disabled={disabled} onChange={this.props.onProductChosen.bind(this, product_name, product_price, product_available)} /></center></td></tr>
 						rows.push(row)
 					}
 				})
@@ -203,7 +228,7 @@ class ProductTable extends React.Component {
 			<div>
 			<table border="1">
 				<ProductListHeader />
-				<ProductList searchValue={this.props.searchValue} showAvailableItems={this.props.showAvailableItems} showAllItems={this.props.showAllItems} products_list={this.props.products_list} onProductChosen={this.props.onProductChosen} chooseNotAvailableItems={this.props.chooseNotAvailableItems}  />
+				<ProductList searchValue={this.props.searchValue} showAvailableItems={this.props.showAvailableItems} showAllItems={this.props.showAllItems} products_list={this.props.products_list} onProductChosen={this.props.onProductChosen} chooseNotAvailableItems={this.props.chooseNotAvailableItems} cartCollection={this.props.cartCollection} />
 			</table>
 			</div>
 		)
@@ -296,18 +321,30 @@ class ShoppingCart extends React.Component {
 
 	handleChooseNotAvailableItems = (evt) => {
 		console.log('value : ' + evt.target.checked)
+
+		if(! evt.target.checked) {
+			Object.keys(this.state.cartCollection).forEach((index) => {
+				let collection = this.state.cartCollection[index]
+				console.log('collection : ' + collection)
+				if(! collection.productAvailable) {
+					delete this.state.cartCollection[index]
+				}
+			})
+		}
+
 		this.setState({
 			chooseNotAvailableItems : evt.target.checked
 		})
 	}
 
-	handleProductChosen = (product_name, product_price, evt) => {
+	handleProductChosen = (product_name, product_price, product_availability, evt) => {
 		console.log('product_name : ' + product_name + ' product_price : ' + product_price)
 
 		if(evt.target.checked) {
 			var json_obj = {}
 			json_obj['productName'] = product_name
 			json_obj['ProductPrice'] = product_price
+			json_obj['productAvailable'] = product_availability
 			console.log('json_obj : ' + JSON.stringify(json_obj))
 
 			this.state.cartCollection.push(json_obj)
@@ -346,7 +383,7 @@ class ShoppingCart extends React.Component {
 			<h1>Shopping Cart</h1>
 			<br />
 			<SearchSection handleShowAvailableItems={this.handleShowAvailableItems} handleShowAllItems={this.handleShowAllItems} handleSearchChange={this.handleSearchChange} handleChooseNotAvailableItems={this.handleChooseNotAvailableItems} />
-			<ProductTable searchValue={this.state.searchValue} showAvailableItems={this.state.showAvailableItems} showAllItems={this.state.showAllItems} products_list={this.props.products_list} onProductChosen={this.handleProductChosen} chooseNotAvailableItems={this.state.chooseNotAvailableItems}  />
+			<ProductTable searchValue={this.state.searchValue} showAvailableItems={this.state.showAvailableItems} showAllItems={this.state.showAllItems} products_list={this.props.products_list} onProductChosen={this.handleProductChosen} chooseNotAvailableItems={this.state.chooseNotAvailableItems} cartCollection={this.state.cartCollection} />
 			<hr />
 			{myCart}
 			</div>
